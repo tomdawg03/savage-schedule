@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Management - Savage Scheduler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0052CC;
+            --primary-dark: #003D99;
+            --primary-light: #E6F0FF;
+            --white: #FFFFFF;
+            --off-white: #F8F9FA;
+            --light-gray: #E9ECEF;
+            --medium-gray: #6C757D;
+            --dark-gray: #343A40;
+            --success: #28A745;
+            --error: #DC3545;
+        }
+
+        body {
+            background-color: var(--off-white);
+            color: var(--dark-gray);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .back-button {
+            padding: 8px 16px;
+            background-color: var(--medium-gray);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: var(--dark-gray);
+            color: var(--white);
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--white);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .user-table th {
+            background-color: var(--primary-light);
+            color: var(--primary-blue);
+            font-weight: bold;
+        }
+
+        .user-table tr:hover {
+            background-color: var(--off-white);
+        }
+
+        .role-select {
+            padding: 6px;
+            border: 1px solid var(--light-gray);
+            border-radius: 4px;
+            width: 150px;
+        }
+
+        .error-message {
+            color: var(--error);
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #fff3f3;
+            border: 1px solid var(--error);
+            border-radius: 4px;
+        }
+
+        .success-message {
+            color: var(--success);
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f3fff3;
+            border: 1px solid var(--success);
+            border-radius: 4px;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-delete:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex !important;
+        }
+
+        .modal {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            z-index: 1001;
+            display: block !important;
+            margin: auto;
+        }
+
+        .modal h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--dark-gray);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid var(--light-gray);
+            border-radius: 4px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            color: var(--dark-gray);
+        }
+
+        .modal form {
+            text-align: left;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .modal-btn-confirm {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .modal-btn-cancel {
+            background-color: var(--medium-gray);
+            color: white;
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: var(--dark-gray);
+        }
+
+        .modal-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .modal-success h3 {
+            color: white;
+        }
+
+        .modal-success .modal-btn {
+            background-color: white;
+            color: var(--success);
+        }
+
+        .modal-success .modal-btn:hover {
+            background-color: var(--light-gray);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>User Management</h1>
+            <a href="/dashboard" class="back-button">Back to Dashboard</a>
+        </div>
+
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        {% if success %}
+        <div class="success-message">{{ success }}</div>
+        {% endif %}
+
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if users and users|length > 0 %}
+                    {% for user in users %}
+                    <tr data-user-id="{{ user.id }}" data-username="{{ user.username }}">
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <select class="role-select" data-user-id="{{ user.id }}" onchange="updateUserRole(this)">
+                                {% for role in roles %}
+                                <option value="{{ role.name }}" {% if user.role == role.name %}selected{% endif %}>
+                                    {{ role.display_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" onclick="showUpdateUserModal({{ user.id }});">Update User Details</button>
+                            <button class="btn-delete" onclick="deleteUser({{ user.id }}, '{{ user.username }}');" {% if user.id == session.user.id %}disabled{% endif %}>
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">
+                            <p class="my-3">No other users found. You are currently the only user in the system.</p>
+                            <p>To add more users, they need to sign up through the registration page.</p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal-overlay">
+        <div class="modal">
+            <h3>Delete User</h3>
+            <p id="confirmationMessage"></p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal('confirmationModal')">Cancel</button>
+                <button id="confirmDeleteButton" class="modal-btn modal-btn-confirm">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal-overlay">
+        <div class="modal modal-success">
+            <h3>Success!</h3>
+            <p>User has been deleted successfully.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn" onclick="window.location.reload()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal-overlay">
+        <div class="modal">
+            <h3>Error</h3>
+            <p id="errorMessage"></p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal('errorModal')">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add the update user modal -->
+    <div id="updateUserModal" class="modal-overlay">
+        <div class="modal">
+            <h3>Update User Details</h3>
+            <form id="updateUserForm" onsubmit="handleUpdateUser(event)">
+                <input type="hidden" id="updateUserId" name="userId">
+                <div style="margin-bottom: 15px;">
+                    <label for="updateUsername">Username:</label>
+                    <input type="text" id="updateUsername" name="username" class="form-control" required>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="updateEmail">Email:</label>
+                    <input type="email" id="updateEmail" name="email" class="form-control" required>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="updatePassword">New Password: (Optional)</label>
+                    <input type="password" id="updatePassword" name="password" class="form-control">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="confirmPassword">Confirm New Password:</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control">
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal('updateUserModal')">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-confirm" style="background-color: var(--primary-blue);">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function updateUserRole(selectElement) {
+            const userId = selectElement.dataset.userId;
+            const newRole = selectElement.value;
+            
+            try {
+                const response = await fetch(`/user/${userId}/role`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ role: newRole })
+                });
+                
+                if (response.ok) {
+                    alert('User role updated successfully');
+                    window.location.reload();
+                } else {
+                    const result = await response.json();
+                    alert(result.error || 'Failed to update user role');
+                    selectElement.value = selectElement.getAttribute('data-original-value');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating user role');
+                selectElement.value = selectElement.getAttribute('data-original-value');
+            }
+        }
+
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('show');
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        async function deleteUser(userId, username) {
+            // Show confirmation dialog
+            if (!confirm(`Are you sure you want to delete user "${username}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/user/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('User has been deleted successfully.');
+                    window.location.reload();
+                } else {
+                    const result = await response.json();
+                    alert(result.error || 'Failed to delete user');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting user');
+            }
+        }
+
+        // Store original role values when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelects = document.querySelectorAll('.role-select');
+            roleSelects.forEach(select => {
+                select.setAttribute('data-original-value', select.value);
+            });
+        });
+
+        async function showUpdateUserModal(userId) {
+            const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+            if (userRow) {
+                const username = userRow.querySelector('td:first-child').textContent;
+                const email = userRow.querySelector('td:nth-child(2)').textContent;
+                
+                document.getElementById('updateUserId').value = userId;
+                document.getElementById('updateUsername').value = username;
+                document.getElementById('updateEmail').value = email;
+                document.getElementById('updatePassword').value = ''; // Clear password field
+                document.getElementById('confirmPassword').value = ''; // Clear confirm password field
+            }
+            showModal('updateUserModal');
+        }
+
+        async function handleUpdateUser(event) {
+            event.preventDefault();
+            
+            const userId = document.getElementById('updateUserId').value;
+            const username = document.getElementById('updateUsername').value;
+            const email = document.getElementById('updateEmail').value;
+            const password = document.getElementById('updatePassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Check if passwords match only if a new password is being set
+            if (password || confirmPassword) {
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match. Please try again.');
+                    return;
+                }
+            }
+
+            // Only include password in the update if one was provided
+            const updateData = {
+                username: username,
+                email: email
+            };
+            
+            if (password) {
+                updateData.password = password;
+            }
+
+            try {
+                const response = await fetch(`/user/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    closeModal('updateUserModal');
+                    alert('User details updated successfully. If you updated your own account, please log out and log back in with the new credentials.');
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Failed to update user details');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating user details');
+            }
+        }
+    </script>
+</body>
+</html> 

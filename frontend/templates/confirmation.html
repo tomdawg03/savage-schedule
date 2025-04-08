@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h2>{{ message if message else "Project Created Successfully!" }}</h2>
+        </div>
+        <div class="card-body">
+            <h3>Project Details:</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Customer Name:</strong> {{ project.customer_name }}</p>
+                    <p><strong>Customer Phone:</strong> {{ project.customer_phone }}</p>
+                    <p><strong>Customer Email:</strong> {{ project.customer_email }}</p>
+                    <p><strong>Date:</strong> {{ project.date }}</p>
+                    <p><strong>PO Number:</strong> {{ project.po }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Address:</strong> {{ project.address }}</p>
+                    <p><strong>City:</strong> {{ project.city }}</p>
+                    <p><strong>Subdivision:</strong> {{ project.subdivision }}</p>
+                    <p><strong>Lot Number:</strong> {{ project.lot_number }}</p>
+                    <p><strong>Square Footage:</strong> {{ project.square_footage }}</p>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <p><strong>Work Types:</strong></p>
+                    <ul>
+                        {% for type in project.work_type %}
+                        <li>{{ type.replace('_', ' ').title() }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <p><strong>Job Cost Types:</strong></p>
+                    <ul>
+                        {% for type in project.job_cost_type %}
+                        <li>{{ type.replace('_', ' ').title() }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% if project.notes %}
+            <div class="row mt-3">
+                <div class="col-12">
+                    <p><strong>Notes:</strong></p>
+                    <p>{{ project.notes }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-footer">
+            <a href="{{ url_for('calendar', region=region) }}" class="btn btn-primary">View Calendar</a>
+            {% if not message %}
+            <a href="{{ url_for('create_project', region=region) }}" class="btn btn-success">Create Another Project</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
