@@ -3,16 +3,25 @@ from flask_login import login_required
 import requests
 import json
 import csv
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your_secret_key')
 
 # Global cache for customer data
 CUSTOMER_CACHE = []
+
+# Backend URL from environment variable
+BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:5001')
+
 def load_customer_cache():
     global CUSTOMER_CACHE
     try:
-        with open('../sav_schedule_back/data/cust_list.csv', 'r') as file:
+        with open('../backend/data/cust_list.csv', 'r') as file:
             reader = csv.reader(file)
             headers = next(reader)
             customer_idx = headers.index('Customer')
@@ -28,8 +37,6 @@ def load_customer_cache():
     except Exception as e:
         print(f"Error loading customer cache: {str(e)}")
         CUSTOMER_CACHE = []
-
-BACKEND_URL = 'http://localhost:5001'
 
 JOB_COST_TYPES = [
     'standard',
@@ -594,4 +601,4 @@ def update_user(user_id):
 
 if __name__ == '__main__':
     load_customer_cache()  # Load customers when app starts
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

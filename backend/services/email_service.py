@@ -3,19 +3,18 @@ import requests
 
 class EmailService:
     def __init__(self):
-        try:
-            self.api_key = os.environ.get('SENDGRID_API_KEY')
-            print(f"Initializing SendGrid with API key: {self.api_key[:5]}...")  # Only print first 5 chars for security
-            if not self.api_key:
-                raise ValueError("SendGrid API key not found in environment")
+        self.api_key = os.environ.get('SENDGRID_API_KEY')
+        if not self.api_key:
+            print("WARNING: SendGrid API key not found. Email notifications will be disabled.")
+        else:
+            print(f"Initializing SendGrid with API key: {self.api_key[:5]}...")
             print("EmailService initialized successfully")
-        except Exception as e:
-            print(f"Error initializing EmailService: {str(e)}")
-            print(f"Error type: {type(e).__name__}")
-            print(f"Full error details: {str(e)}")
-            raise
 
     def send_project_confirmation(self, customer_email, customer_name, project_date, address, customer_phone=None, po=None, city=None, subdivision=None, lot_number=None, square_footage=None, job_cost_type=None, work_type=None, notes=None, region=None):
+        if not self.api_key:
+            print("Email service disabled - no API key configured")
+            return False
+
         if not customer_email:
             print("No email provided, skipping email notification")
             return False
@@ -160,6 +159,10 @@ class EmailService:
             return False
 
     def send_project_update(self, customer_email, customer_name, project_date, address, customer_phone=None, po=None, city=None, subdivision=None, lot_number=None, square_footage=None, job_cost_type=None, work_type=None, notes=None, region=None, update_type="modification"):
+        if not self.api_key:
+            print("Email service disabled - no API key configured")
+            return False
+
         if not customer_email:
             print("No email provided for update, skipping")
             return False
@@ -299,6 +302,10 @@ class EmailService:
             return False 
 
     def send_project_reminder(self, customer_email, customer_name, project_date, address, customer_phone=None, po=None, city=None, subdivision=None, lot_number=None, square_footage=None, job_cost_type=None, work_type=None, notes=None, region=None):
+        if not self.api_key:
+            print("Email service disabled - no API key configured")
+            return False
+
         if not customer_email:
             print("No email provided, skipping reminder email")
             return False

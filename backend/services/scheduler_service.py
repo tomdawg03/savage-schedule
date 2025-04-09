@@ -11,7 +11,13 @@ class SchedulerService:
     def __init__(self, app):
         self.app = app
         self.scheduler = BackgroundScheduler()
-        self.email_service = EmailService()
+        
+        try:
+            self.email_service = EmailService()
+        except Exception as e:
+            print(f"Warning: Email service initialization failed: {str(e)}")
+            print("Email notifications will be disabled")
+            self.email_service = None
         
         # Add job to check for upcoming projects and send reminders
         self.scheduler.add_job(
@@ -41,6 +47,11 @@ class SchedulerService:
                 # Query for projects scheduled for tomorrow
                 projects = Project.query.filter_by(date=tomorrow).all()
                 print(f"Found {len(projects)} projects scheduled for tomorrow")
+
+                # Skip email notifications if email service is not available
+                if not self.email_service:
+                    print("Email service not available, skipping notifications")
+                    return
 
                 # Send reminders for each project
                 for project in projects:
