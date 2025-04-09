@@ -176,6 +176,9 @@ class EmailService:
             job_cost_types_display = ", ".join(format_type(t) for t in job_cost_type) if isinstance(job_cost_type, list) else "Not specified"
             work_types_display = ", ".join(format_type(t) for t in work_type) if isinstance(work_type, list) else "Not specified"
             
+            # Set the message based on update type
+            update_message = "updated" if update_type == "modification" else update_type
+            
             data = {
                 "personalizations": [
                     {
@@ -190,7 +193,7 @@ class EmailService:
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                         <div style="text-align: center; margin-bottom: 30px;">
                             <h1 style="color: #333; margin-bottom: 10px;">Project Update</h1>
-                            <p style="color: #666; font-size: 16px;">Your project has been {update_type}</p>
+                            <p style="color: #666; font-size: 16px;">Your project has been {update_message}</p>
                         </div>
 
                         <div style="background-color: #f7f7f7; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
